@@ -4,12 +4,13 @@ import re
 from datetime import datetime
 from uuid import uuid1
 
+from celery import Celery
 from flask import flash, Flask, redirect, render_template, request
 
 from yaml_model import LoadOnAccess, Model, OnAccess, SingletonModel
 
 app = Flask(__name__)
-
+build_queue = Celery('build_queue')
 
 def request_fill(model_obj, fill_atts, save=True):
     """
@@ -35,11 +36,16 @@ def root():
 def config():
     config = Config()
 
-    if 'secret' in request.form and request.form['secret'] != config.secret:
+    restart_attrs = ('broker_url', 'secret')
+    restart_checks = (attr in request.form and request.form[attr] != getattr(config, attr, None)
+                      for attr
+                      in restart_attrs
+                      )
+    if any(restart_checks):
         flash(u"An application restart is required for some changes to take effect",
               'warning')
 
-    request_fill(config, ('docker_host', 'secret'))
+    request_fill(config, ('broker_url', 'docker_host', 'secret'))
 
     return render_template('config.html', config=config)
 
@@ -151,6 +157,7 @@ class Build(Model):
 class Config(SingletonModel):
     # TODO docker_hosts
     docker_host = LoadOnAccess(default=lambda _: 'unix:///var/run/docker.sock')
+    broker_url = LoadOnAccess(default=lambda _: 'amqp://guest:guest@localhost:5672//')
     secret = LoadOnAccess(generate=lambda _: os.random(24))
 
 
@@ -172,4 +179,5 @@ def all_jobs():
 if __name__ == "__main__":
     config = Config()
     app.secret_key = config.secret
+    build_queue.conf.update(BROKER_URL=config.broker_url)
     app.run(debug=True)

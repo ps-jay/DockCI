@@ -10,6 +10,12 @@
     </div>
   </div>
   <div class="form-group">
+    <label for="inputBrokerURL" class="col-sm-2 control-label">Task queue broker URL</label>
+    <div class="col-sm-10">
+      <input class="form-control" id="inputBrokerURL" name="broker_url" placeholder="amqp://..." value="{{ config.broker_url or '' }}">
+    </div>
+  </div>
+  <div class="form-group">
     <label for="inputSecret" class="col-sm-2 control-label">Secret</label>
     <div class="col-sm-10">
       <input class="form-control" id="inputSecret" name="secret" value="{{ config.secret or '' }}">

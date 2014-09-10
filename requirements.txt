@@ -3,7 +3,13 @@ Jinja2==2.7.3
 MarkupSafe==0.23
 PyYAML==3.11
 Werkzeug==0.9.6
+amqp==1.4.6
+anyjson==0.3.3
+billiard==3.3.0.18
+celery==3.1.14
 gnureadline==6.3.3
 ipdb==0.8
 ipython==2.2.0
 itsdangerous==0.24
+kombu==3.0.22
+pytz==2014.7
