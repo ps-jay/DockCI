@@ -388,12 +388,20 @@ class Build(Model):  # pylint:disable=too-many-instance-attributes
         # Don't use the docker caches if a version tag is defined
         no_cache = (self.version is not None)
 
+        tag = None
+        if self.version is not None:
+            tag = "%s:%s" % (
+                self.job_slug,
+                self.version,
+                )
+
         return self._run_docker(
             'build',
             # saved stream for debugging
             # lambda: open('docker_build_stream', 'r'),
             lambda: self.docker_client.build(path=workdir,
                                              nocache=no_cache,
+                                             tag=tag,
                                              rm=True,
                                              stream=True),
             on_done=on_done,
